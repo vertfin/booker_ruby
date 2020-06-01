@@ -196,13 +196,18 @@ module Booker
         }, params))
       end
 
-      def override_order_item_price order_id:, order_item_id:, price:, product_variant_id:, qty:, params: {}
-        put(API_METHODS[:add_product_to_order], build_params({
-          'OrderID'          => order_id,
-          'ProductVariantID' => product_variant_id,
+      def override_order_item_price order_id:, order_item_id:, price:, params: {}
+        put("#{V41_PREFIX}/order/#{order_id}/override_price", build_params({
           'OrderItemID'      => order_item_id,
-          'Price'            => price,
-          'Quantity'         => qty,
+          # "OverrideReasonID": 0,
+          "Price": {
+            "Amount": price,
+            # "CurrencyCode": "string"
+          },
+          # "ExcludeCustomerObject": true,
+          # "ExcludeApplicableSpecials": true,
+          # "ID": 0,
+          # "ReturnPartialOrderObject": true
         }, params))
       end
 
