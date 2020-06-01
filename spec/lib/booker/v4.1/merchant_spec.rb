@@ -40,7 +40,10 @@ describe Booker::V41::Merchant do
         customers: "#{v41_prefix}/customers",
         create_special: "#{v41_prefix}/special",
         employees: "#{v41_prefix}/employees",
-        treatments: "#{v41_prefix}/treatments"
+        treatments: "#{v41_prefix}/treatments",
+        create_order: "#{v41_prefix}/order",
+        add_product_to_order: "#{v41_prefix}/order/add_product",
+        find_products: "#{v41_prefix}/order/find_products",
       }
     end
 

@@ -4,7 +4,8 @@ module Booker
 
     attr_accessor :base_url, :auth_base_url, :client_id, :client_secret, :temp_access_token,
                   :temp_access_token_expires_at, :token_store, :token_store_callback_method, :api_subscription_key,
-                  :access_token_scope, :refresh_token, :location_id, :auth_with_client_credentials, :request_timeout
+                  :access_token_scope, :refresh_token, :location_id, :auth_with_client_credentials, :request_timeout,
+                  :refresh_token_store, :refresh_token_store_callback_method
 
     CREATE_TOKEN_CONTENT_TYPE = 'application/x-www-form-urlencoded'.freeze
     CLIENT_CREDENTIALS_GRANT_TYPE = 'client_credentials'.freeze
@@ -45,11 +46,11 @@ module Booker
           raise ex unless self.auth_with_client_credentials || self.refresh_token.present?
         end
       end
-      if self.access_token_scope.blank?
-        self.access_token_scope = VALID_ACCESS_TOKEN_SCOPES.first
-      elsif !self.access_token_scope.in?(VALID_ACCESS_TOKEN_SCOPES)
-        raise ArgumentError, "access_token_scope must be one of: #{VALID_ACCESS_TOKEN_SCOPES.join(', ')}"
-      end
+      #if self.access_token_scope.blank?
+      #  self.access_token_scope = VALID_ACCESS_TOKEN_SCOPES.first
+      #elsif !self.access_token_scope.in?(VALID_ACCESS_TOKEN_SCOPES)
+      #  raise ArgumentError, "access_token_scope must be one of: #{VALID_ACCESS_TOKEN_SCOPES.join(', ')}"
+      #end
     end
 
     def get_base_url
@@ -160,6 +161,9 @@ module Booker
     def handle_errors!(url, request, response, retry_unauthorized=true)
       puts "BOOKER RESPONSE: #{response}" if ENV['BOOKER_API_DEBUG'] == 'true'
 
+      # some super JMS hackery
+      update_refresh_token_store
+
       error_class = API_GATEWAY_ERRORS[response.code]
 
       begin
@@ -194,6 +198,12 @@ module Booker
     def update_token_store
       if self.token_store.present? && self.token_store_callback_method.present?
         self.token_store.send(self.token_store_callback_method, self.temp_access_token, self.temp_access_token_expires_at)
+      end
+    end
+
+    def update_refresh_token_store
+      if self.refresh_token_store.present? && self.refresh_token_store_callback_method.present? && self.refresh_token
+        self.refresh_token_store.send(self.refresh_token_store_callback_method, self.refresh_token)
       end
     end
 

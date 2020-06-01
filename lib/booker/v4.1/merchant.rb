@@ -14,6 +14,9 @@ module Booker
         create_special: "#{V41_PREFIX}/special".freeze,
         employees: "#{V41_PREFIX}/employees".freeze,
         treatments: "#{V41_PREFIX}/treatments".freeze,
+        create_order: "#{V41_PREFIX}/order".freeze,
+        add_product_to_order: "#{V41_PREFIX}/order/add_product".freeze,
+        find_products: "#{V41_PREFIX}/order/find_products".freeze,
       }.freeze
 
       def online_booking_settings(location_id:)
@@ -154,6 +157,89 @@ module Booker
           Name: name
         }, params))
       end
+
+      ################################################################
+      ################################################################
+      ################################################################
+
+      # CreateOrder
+      def create_order(params: {})
+        post(API_METHODS[:create_order], build_params(params))
+      end
+
+      # AddPaymentToOrder -- Cash Only
+      def add_cash_payment_to_order(order_id:,amount:,params:{})
+        post("#{V41_PREFIX}/order/#{order_id}/add_payment", build_params({
+          'PaymentItem' => {
+            "CustomPaymentMethodID" => 4, # Cash
+            "Method" => {
+              "ID" => 4,
+              "Name" => 'Cash',
+            },
+            "Amount" => {
+              "Amount" => amount
+            },
+          }
+        }, params))
+      end
+
+      def place_order(order_id:, params: {})
+        post "#{V41_PREFIX}/order/#{order_id}/place_order", build_params({
+        }, params)
+      end
+
+      def add_product_to_order order_id:, product_variant_id:, qty:, params: {}
+        put(API_METHODS[:add_product_to_order], build_params({
+          'OrderID' => order_id,
+          'ProductVariantID' => product_variant_id,
+          'Quantity' => qty,
+        }, params))
+      end
+
+      def override_order_item_price order_id:, order_item_id:, price:, product_variant_id:, qty:, params: {}
+        put(API_METHODS[:add_product_to_order], build_params({
+          'OrderID'          => order_id,
+          'ProductVariantID' => product_variant_id,
+          'OrderItemID'      => order_item_id,
+          'Price'            => price,
+          'Quantity'         => qty,
+        }, params))
+      end
+
+      def find_products params: {}
+        post(API_METHODS[:find_products], build_params(params))
+      end
+
+      def get_order order_id:, params: {}
+        get("#{V41_PREFIX}/order/#{order_id}", build_params({
+          'returnPartialObjectOrder'  => false,
+          'excludeCustomerObject'     => false,
+          'excludeApplicableSpecials' => true,
+      }, params))
+      end
+
+      def find_orders(location_id:, params: {})
+        post("#{V41_PREFIX}/orders", build_params({
+          LocationID: location_id
+	}, params))
+      end
+
+      def get_quantity_in_stock( product_variant_ids:, params: {})
+        put("#{V41_PREFIX}/order/quantity_in_stock", build_params({
+          "ProductVariantIDs": product_variant_ids
+        }, params))
+      end
+
+      def create_login params
+	post("#{V41_PREFIX}/user", build_params(params))
+      end
+
+      def add_customer_to_order order_id:, customer:, params: {}
+        post("#{V41_PREFIX}/order/#{order_id}/add_customer", build_params({
+          "Customer": customer
+        }, params))
+      end
+
     end
   end
 end
