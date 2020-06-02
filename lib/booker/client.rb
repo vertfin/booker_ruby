@@ -162,7 +162,7 @@ module Booker
       puts "BOOKER RESPONSE: #{response}" if ENV['BOOKER_API_DEBUG'] == 'true'
 
       # some super JMS hackery
-      update_refresh_token_store
+      update_refresh_token_store(response)
 
       error_class = API_GATEWAY_ERRORS[response.code]
 
@@ -201,9 +201,11 @@ module Booker
       end
     end
 
-    def update_refresh_token_store
-      if self.refresh_token_store.present? && self.refresh_token_store_callback_method.present? && self.refresh_token
-        self.refresh_token_store.send(self.refresh_token_store_callback_method, self.refresh_token)
+    def update_refresh_token_store(response)
+      if self.refresh_token_store.present? && self.refresh_token_store_callback_method.present?
+        if response['refresh_token'] && response['refresh_token']!='refresh_token'
+          self.refresh_token_store.send(self.refresh_token_store_callback_method, response['refresh_token'])
+        end
       end
     end
 
