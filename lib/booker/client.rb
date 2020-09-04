@@ -259,7 +259,7 @@ module Booker
       end
     end
 
-    def get_location_access_token(existing_token, location_id)
+    def get_location_access_token(existing_token, brand_id, location_id)
       options = {
         headers: {
           'Accept' => 'application/json',
@@ -267,6 +267,7 @@ module Booker
           'Ocp-Apim-Subscription-Key' => self.api_subscription_key
         },
         query: {
+          brandId: brand_id,
           locationId: location_id
         },
         timeout: 30
