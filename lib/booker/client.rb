@@ -275,6 +275,12 @@ module Booker
       url = "#{self.auth_base_url}#{UPDATE_TOKEN_CONTEXT_PATH}"
 
       begin
+        if ENV['BOOKER_API_DEBUG'] == 'true'
+          puts "AT get_location_access_token:"
+          puts "  URL: #{url}"
+          puts "  OPTIONS: #{options}"
+        end
+
         resp = handle_errors! url, options, HTTParty.post(url, options), false
       rescue Booker::ServiceUnavailable, Booker::RateLimitExceeded
         # retry once
