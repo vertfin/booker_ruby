@@ -250,6 +250,13 @@ module Booker
 
       url = "#{self.auth_base_url}#{CREATE_TOKEN_PATH}"
 
+      if ENV['BOOKER_API_DEBUG'] == 'true'
+        puts
+        puts "get_access_token url: #{url}"
+        puts "  body: #{body}"
+        puts "  options: #{options}"
+      end
+
       begin
         handle_errors! url, options, HTTParty.post(url, options), false
       rescue Booker::ServiceUnavailable, Booker::RateLimitExceeded
